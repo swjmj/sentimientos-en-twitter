@@ -150,7 +150,7 @@ if opt=='3':
     }
 
     print('----------------------------y el entrenamiento---------------------')
-    grind_search = GridSearchCV(pipeline, parameters, n_jobs=-1, scoring='roc_auc')
+    grind_search = GridSearchCV(pipeline, parameters, n_jobs=-1,  verbose=10, scoring='roc_auc')
     grind_search.fit(tweets_id.tweets, tweets_id.sentiment)
 
     print(grind_search.best_params_)
