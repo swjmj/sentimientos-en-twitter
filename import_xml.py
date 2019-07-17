@@ -15,7 +15,9 @@ from sklearn.svm import LinearSVC
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 import io
-
+from sklearn.metrics import f1_score, matthews_corrcoef
+import pickle
+from sklearn.externals import joblib
 
 
 #Funciones que me detectan el idioma de un
@@ -97,9 +99,20 @@ def tokenize(text):
         stem = ['']
     return stem
 
+
+    
+
 if __name__ == "__main__": 
-    print('Que operación desea?\n1----->Extraer tweets\n2----->En que idioma están los tweets\n3------>SVM grid serach and fit')
+    print('Que operación desea?\n1----->Extraer tweets\n2----->En que idioma están los tweets\n3------>SVM grid serach and fit\n4----->Pueba y guardado\n5----->carga y prediccion')
     opt = input()
+
+    #-------------------------------------defininiendo stopwords------------------------------
+    spanish_stopwords = stopwords.words('spanish')
+    #iniciaizando 
+    english_stopwords = [line.rstrip('\n') for line in open('english_stopwords.txt')]
+    english_stopwords.extend(['algun', 'com','contr', 'cuand', 'desd', 'dond', 'durant', 'eram', 'estab', 'estais', 'estam', 'estan', 'estand', 'estaran', 'estaras', 'esteis', 'estem', 'esten', 'estes', 'estuv', 'fuer', 'fues', 'fuim', 'fuist', 'hab', 'habr', 'habran', 'habras', 'hast', 'hem', 'hub', 'mas', 'mia', 'mias', 'mio', 'mios', 'much', 'nad', 'nosotr', 'nuestr', 'par', 'per', 'poc', 'porqu', 'qui', 'seais', 'seam', 'sent', 'ser', 'seran', 'seras', 'si', 'sient', 'sint', 'sobr', 'som', 'suy', 'tambien', 'tant', 'ten', 'tendr', 'tendran', 'tendras', 'teng', 'tien', 'tod', 'tuv', 'tuy', 'vosotr', 'vuestr', 'abov', 'becaus', 'befor', 'betw', 'furth', 'hav', 'mor', 'ourselv', 'sam', 'tambi', 'themselv', 'ther', 'thes', 'thos', 'wer', 'wher', 'whil', 'yourselv'])
+    spanish_stopwords.extend(english_stopwords)
+
     #extrayendo los tweets del archivo xml
     if opt=='1':
         print('--------------------procesando---------------------------------------')
@@ -133,8 +146,6 @@ if __name__ == "__main__":
 
         vectorizer = CountVectorizer(analyzer = 'word', tokenizer = tokenize, lowercase=True, stop_words=spanish_stopwords)
 
-        vector = vectorizer.fit_transform(tweets_id.tweets)
-
         #ahora se está haciendo el entrenamiento
         pipeline = Pipeline([('vect', vectorizer), ('cls', LinearSVC())])
 
@@ -156,3 +167,50 @@ if __name__ == "__main__":
         print(grind_search.best_params_)
         best_param = pd.DataFrame(grind_search.best_params_)
         best_param.to_csv('best_params.csv', encoding='utf-8')
+
+    if opt=='4':
+        print('-------------------------------------------fit-----------------------------------------------------')
+        #Creamos un Pipeline con los mejores parámetros 
+        pipeline = Pipeline([
+            ('vect', CountVectorizer(
+                    analyzer = 'word',
+                    tokenizer = tokenize,
+                    lowercase = True,
+                    stop_words = spanish_stopwords,
+                    min_df = 20,
+                    max_df = 2.5,
+                    ngram_range=(1, 1),
+                    max_features=1000
+                    )),
+            ('cls', LinearSVC(
+                    C=0.2,
+                    loss='squared_hinge',
+                    max_iter=1500, 
+                    multi_class='ovr', 
+                    random_state=None, 
+                    penalty='l2', 
+                    tol=0.0001
+                    )),
+        ])
+        tweets_id = pd.read_csv('tweets_extraidos_large.csv', encoding='utf-8')
+        tweets_test = pd.read_csv('tweets_extraidos.csv', encoding='utf-8')
+        #ajustamos el modelo at corpus gigante
+        pipeline.fit(tweets_id.tweets, tweets_id.sentiment)
+        #we make a test
+        tweets_test['polarity'] = pipeline.predict(tweets_test.tweets)
+        print('con ',tweets_test.sentiment.shape[0], 'tweets el f1_score es: ', f1_score(tweets_test.sentiment, pipeline.predict(tweets_test.tweets)))
+        print('y el coeficiente de Matthews es: ', matthews_corrcoef(tweets_test.sentiment, pipeline.predict(tweets_test.tweets)))
+        joblib.dump(pipeline, 'SVC_NLP.pkl') 
+        
+    if opt=='5':
+        print('Tweets a procesar')
+        opt1 = pd.DataFrame([str(input())], columns=['tweets'])
+        print('-------------------------------------------predicción-----------------------------------------------------')
+        # Cargamos modelo ya preentrenado
+        modelo = joblib.load('SVC_NLP.pkl') 
+        prediccion = modelo.predict(opt1.tweets)
+        print(prediccion[0])
+        if prediccion[0]==1:
+            print('el texto es positivo')
+        if prediccion[0]==0:
+            print('el texto es negativo')
