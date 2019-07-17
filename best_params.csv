@@ -1,0 +1,2 @@
+,cls__C,cls__loss,cls__max_iter,vect__max_df,vect__max_features,vect__min_df,vect__ngram_range
+0,0.2,squared_hinge,1500,2.5,1000,20,(1,1)
