@@ -155,4 +155,4 @@ if opt=='3':
 
     print(grind_search.best_params_)
     best_param = pd.DataFrame(grind_search.best_params_)
-    best_prams.to_csv('best_params.csv', encoding='utf-8')
+    best_param.to_csv('best_params.csv', encoding='utf-8')
