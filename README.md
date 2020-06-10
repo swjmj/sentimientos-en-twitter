@@ -24,11 +24,13 @@ El algoritmo hace uso de tres librerías para detectar el idioma: langid, langde
 
 
 Cosas a tomar en cuenta: 
-Hay varios paths que estan escritos a mano en el codigo fuente, en especial los nombres de los archivos que se leen y guardan. 
-El flujo de trabajo sería:
+Hay varios paths que estan escritos a mano en el codigo fuente, en especial los nombres de los archivos que se leen y guardan. El flujo de trabajo sería:
   Opción 1 (aquí no es necesario renombrar nada) 
   Opción 2 (opcional)
   Opción 3 (en general esto es automatico, pero cuando se quieren hacer pruebas puede ser muy engorroso estar cambiando el       archivo donde se guardan las cosas en el codigo fuente).
   Opción 4.- En esta opción no se tiene que hacer mucho a menos que se quiera cambiar el nombre del archivo donde se guarda el modelo.
   Opción 5.- Sólo queda probar el modelo de manera manual.
   
+
+
+Cualquier comentario es bienvenido.
