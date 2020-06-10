@@ -1,4 +1,4 @@
-# the_thing_of_the_words
+# Sentimientos en twitter
 
 Este es un codigo prueba para un clasificador de positividad o negatividad en un conjunto de textos,
 su principal proposito es clasificar si un tweet es positivo o negativo.
